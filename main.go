@@ -1,55 +1,57 @@
 package main
 
 import (
-	"bufio"
 	"net/http"
-	"os"
-	"path"
+	"text/template"
 )
 
 func main() {
-	http.Handle("/", new(myHandler))
+	http.HandleFunc("/", func(resp http.ResponseWriter, req *http.Request) {
+		resp.Header().Add("Content-Type", "text/html")
+
+		body, _ := template.New("body").Parse(doc)
+		header, _ := template.New("header").Parse(header)
+		footer, _ := template.New("footer").Parse(footer)
+		templates := template.New("main")
+		templates.
+		context := Context{
+			[3]string{"Lemon", "Orange", "Apple"},
+			"the title",
+		}
+		err := templates.Lookup("test").Execute(resp, context)
+		if err != nil {
+			resp.WriteHeader(404)
+			resp.Write([]byte(err.Error()))
+		}
+	})
+
 	http.ListenAndServe(":8080", nil)
 }
 
-type myHandler struct {
-	http.Handler
-}
+const doc = `
+{{template "header" .Title}}
+  <body>
+    <h1>List of Fruit</h1>
+    <ul>
+      {{range .Fruit}}
+      	<li>{{.}}</li>
+      {{end}}
+    </ul>
+  </body>
+{{template "footer"}}
+`
 
-func (handler *myHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
-	filePath := "public" + req.URL.Path
+const header = `
+<!DOCTYPE html>
+<html>
+  <head><title>{{.}}</title></head>
+`
 
-	contentType := getContentType(filePath)
-	resp.Header().Add("Content-Type", contentType)
+const footer = `
+</html>
+`
 
-	f, err := os.Open(filePath)
-	if err != nil {
-		resp.WriteHeader(404)
-		resp.Write([]byte("404 - " + err.Error()))
-		return
-	}
-
-	bufferedReader := bufio.NewReader(f)
-	bufferedReader.WriteTo(resp)
-}
-
-func getContentType(filePath string) string {
-	var contentType string
-	ext := path.Ext(filePath)[1:]
-	switch ext {
-	case "html":
-		contentType = "text/html"
-	case "css":
-		contentType = "text/css"
-	case "png":
-		contentType = "image/png"
-	case "js":
-		contentType = "application/javascript"
-	case "mp4":
-		contentType = "video/mp4"
-	default:
-		contentType = "text/plain"
-	}
-
-	return contentType
+type Context struct {
+	Fruit [3]string
+	Title string
 }

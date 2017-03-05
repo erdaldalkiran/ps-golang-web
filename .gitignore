@@ -6,6 +6,8 @@
 # Folders
 _obj
 _test
+debug
+.vscode
 
 # Architecture specific extensions/prefixes
 *.[568vq]
