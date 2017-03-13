@@ -5,8 +5,10 @@ import "path/filepath"
 import "log"
 import "net/http"
 import "fmt"
+import "github.com/oxtoacart/bpool"
 
 var templates map[string]*template.Template
+var bufpool *bpool.BufferPool
 
 func main() {
 	initialize()
@@ -25,6 +27,8 @@ func main() {
 }
 
 func initialize() {
+	bufpool = bpool.NewBufferPool(32)
+
 	if templates == nil {
 		templates = make(map[string]*template.Template)
 	}
@@ -52,7 +56,15 @@ func renderTemplate(w http.ResponseWriter, name string, data interface{}) error 
 	if !ok {
 		return fmt.Errorf("the template %s does not exist", name)
 	}
+	buff := bufpool.Get()
+	defer bufpool.Put(buff)
+
+	err := tmpl.ExecuteTemplate(buff, "base.tmpl", data)
+	if err != nil {
+		return err
+	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	return tmpl.ExecuteTemplate(w, "base.tmpl", data)
+	buff.WriteTo(w)
+	return nil
 }
