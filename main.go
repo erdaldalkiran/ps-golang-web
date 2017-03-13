@@ -1,57 +1,58 @@
 package main
 
-import (
-	"net/http"
-	"text/template"
-)
+import "html/template"
+import "path/filepath"
+import "log"
+import "net/http"
+import "fmt"
+
+var templates map[string]*template.Template
 
 func main() {
-	http.HandleFunc("/", func(resp http.ResponseWriter, req *http.Request) {
-		resp.Header().Add("Content-Type", "text/html")
+	initialize()
 
-		body, _ := template.New("body").Parse(doc)
-		header, _ := template.New("header").Parse(header)
-		footer, _ := template.New("footer").Parse(footer)
-		templates := template.New("main")
-		templates.
-		context := Context{
-			[3]string{"Lemon", "Orange", "Apple"},
-			"the title",
-		}
-		err := templates.Lookup("test").Execute(resp, context)
+	http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+		tmplName := req.URL.Path[1:] + ".tmpl"
+		err := renderTemplate(w, tmplName, nil)
 		if err != nil {
-			resp.WriteHeader(404)
-			resp.Write([]byte(err.Error()))
+			w.WriteHeader(500)
+			w.Write([]byte(err.Error()))
 		}
 	})
 
 	http.ListenAndServe(":8080", nil)
+
 }
 
-const doc = `
-{{template "header" .Title}}
-  <body>
-    <h1>List of Fruit</h1>
-    <ul>
-      {{range .Fruit}}
-      	<li>{{.}}</li>
-      {{end}}
-    </ul>
-  </body>
-{{template "footer"}}
-`
+func initialize() {
+	if templates == nil {
+		templates = make(map[string]*template.Template)
+	}
 
-const header = `
-<!DOCTYPE html>
-<html>
-  <head><title>{{.}}</title></head>
-`
+	const templatesDir = "templates/" //move to config
+	templateNames, err := filepath.Glob(templatesDir + "pages/*.tmpl")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-const footer = `
-</html>
-`
+	commonTemplates, err := filepath.Glob(templatesDir + "includes/*.tmpl")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-type Context struct {
-	Fruit [3]string
-	Title string
+	for _, templateName := range templateNames {
+		files := append(commonTemplates, templateName)
+		templates[filepath.Base(templateName)] = template.Must(template.ParseFiles(files...))
+	}
+
+}
+
+func renderTemplate(w http.ResponseWriter, name string, data interface{}) error {
+	tmpl, ok := templates[name]
+	if !ok {
+		return fmt.Errorf("the template %s does not exist", name)
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	return tmpl.ExecuteTemplate(w, "base.tmpl", data)
 }
