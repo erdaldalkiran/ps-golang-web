@@ -1,0 +1,20 @@
+{{define "category"}}
+<div class="row category orient-{{if .IsOrientRight}}right{{else}}left{{end}}">
+				<a href="/products">
+					{{if not .IsOrientRight}}
+						<div class="columns small-4">
+							<img src="/img/{{.ImageUrl}}.png" alt="{{.ImageUrl}}" />
+						</div>
+					{{end}}
+					<div class="columns small-8">
+						<h2>{{.Title}}</h2>
+						<p>{{.Description}}</p>
+					</div>
+					{{if .IsOrientRight}}
+						<div class="columns small-4">
+							<img src="/img/{{.ImageUrl}}.png" alt="{{.ImageUrl}}" />
+						</div>
+					{{end}}
+				</a>
+			</div>
+{{end}}

@@ -1,0 +1,9 @@
+{{define "content"}}
+<div class="row categories">
+		<div class="columns small-10 small-offset-1">
+		{{range .}}
+			{{template "category" .}}
+		{{end}}
+		</div>
+	</div>
+{{end}}
