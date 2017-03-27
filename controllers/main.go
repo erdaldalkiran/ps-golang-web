@@ -10,19 +10,24 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/gorilla/mux"
 	"github.com/oxtoacart/bpool"
 )
 
 var templates map[string]*template.Template
 var bufpool *bpool.BufferPool
+var router *mux.Router
 
 func Initialize() {
 	bufpool = bpool.NewBufferPool(32)
 	populateTemplates()
+	router = mux.NewRouter()
 }
 
 func Register() {
 	registerController()
+
+	http.Handle("/", router)
 
 	http.HandleFunc("/img/", func(w http.ResponseWriter, req *http.Request) {
 		err := serverResource(w, "public"+req.URL.Path, "image/png")
@@ -55,6 +60,11 @@ func registerController() {
 
 func handleError(w http.ResponseWriter, err error) {
 	w.WriteHeader(500)
+	w.Write([]byte(err.Error()))
+}
+
+func handle404Error(w http.ResponseWriter, err error) {
+	w.WriteHeader(404)
 	w.Write([]byte(err.Error()))
 }
 

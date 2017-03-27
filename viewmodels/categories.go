@@ -8,6 +8,7 @@ type Categories struct {
 }
 
 type Category struct {
+	Id            int
 	ImageUrl      string
 	Title         string
 	Description   string
@@ -21,6 +22,7 @@ func NewCategories() *Categories {
 		Footer: NewFooter(),
 		Content: []Category{
 			Category{
+				Id:       1,
 				ImageUrl: "lemon",
 				Title:    "Juices and Mixes",
 				Description: `Explore our wide assortment of juices and mixes expected by
@@ -31,6 +33,7 @@ func NewCategories() *Categories {
 				IsOrientRight: false,
 			},
 			Category{
+				Id:       2,
 				ImageUrl: "kiwi",
 				Title:    "Cups, Straws, and Other Supplies",
 				Description: `From paper cups to bio-degradable plastic to straws and
@@ -39,6 +42,7 @@ func NewCategories() *Categories {
 				IsOrientRight: true,
 			},
 			Category{
+				Id:       3,
 				ImageUrl: "pineapple",
 				Title:    "Signs and Advertising",
 				Description: `Sure, you could just wait for people to find your stand

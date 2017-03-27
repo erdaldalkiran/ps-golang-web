@@ -1,6 +1,6 @@
 {{define "category"}}
 <div class="row category orient-{{if .IsOrientRight}}right{{else}}left{{end}}">
-				<a href="/products">
+				<a href="/products/category/{{.Id}}">
 					{{if not .IsOrientRight}}
 						<div class="columns small-4">
 							<img src="/img/{{.ImageUrl}}.png" alt="{{.ImageUrl}}" />
