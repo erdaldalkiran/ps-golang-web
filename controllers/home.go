@@ -15,5 +15,5 @@ func (c *homeController) register() {
 
 func (c *homeController) get(w http.ResponseWriter, r *http.Request) {
 	vm := viewmodels.NewHome()
-	renderTemplate(w, "home", vm)
+	renderTemplate(w, r, "home", vm)
 }

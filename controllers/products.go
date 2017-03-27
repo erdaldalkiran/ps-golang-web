@@ -18,7 +18,7 @@ func (c *productsController) register() {
 
 func (c *productsController) get(w http.ResponseWriter, r *http.Request) {
 	vm := viewmodels.NewProducts()
-	renderTemplate(w, "products", vm)
+	renderTemplate(w, r, "products", vm)
 }
 
 func (c *productsController) getByCategoryId(w http.ResponseWriter, r *http.Request) {
@@ -34,5 +34,6 @@ func (c *productsController) getByCategoryId(w http.ResponseWriter, r *http.Requ
 		handle404Error(w, err)
 		return
 	}
-	renderTemplate(w, "products", vm)
+
+	renderTemplate(w, r, "products", vm)
 }

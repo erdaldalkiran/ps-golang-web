@@ -15,5 +15,6 @@ func (c *categoriesController) register() {
 
 func (c *categoriesController) get(w http.ResponseWriter, r *http.Request) {
 	vm := viewmodels.NewCategories()
-	renderTemplate(w, "categories", vm)
+
+	renderTemplate(w, r, "categories", vm)
 }

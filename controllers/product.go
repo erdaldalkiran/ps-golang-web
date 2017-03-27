@@ -29,5 +29,6 @@ func (c *productController) get(w http.ResponseWriter, r *http.Request) {
 		handle404Error(w, err)
 		return
 	}
-	renderTemplate(w, "product", vm)
+
+	renderTemplate(w, r, "product", vm)
 }

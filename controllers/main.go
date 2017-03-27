@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/erdalkiran/ps-golang-web/controllers/util"
 	"github.com/gorilla/mux"
 	"github.com/oxtoacart/bpool"
 )
@@ -29,15 +30,15 @@ func Register() {
 
 	http.Handle("/", router)
 
-	http.HandleFunc("/img/", func(w http.ResponseWriter, req *http.Request) {
-		err := serverResource(w, "public"+req.URL.Path, "image/png")
+	http.HandleFunc("/img/", func(w http.ResponseWriter, r *http.Request) {
+		err := serverResource(w, r, "public"+r.URL.Path, "image/png")
 		if err != nil {
 			handleError(w, err)
 		}
 	})
 
-	http.HandleFunc("/css/", func(w http.ResponseWriter, req *http.Request) {
-		err := serverResource(w, "public"+req.URL.Path, "text/css")
+	http.HandleFunc("/css/", func(w http.ResponseWriter, r *http.Request) {
+		err := serverResource(w, r, "public"+r.URL.Path, "text/css")
 		if err != nil {
 			handleError(w, err)
 		}
@@ -68,7 +69,7 @@ func handle404Error(w http.ResponseWriter, err error) {
 	w.Write([]byte(err.Error()))
 }
 
-func serverResource(w http.ResponseWriter, fileName string, contentType string) error { //use struct instead of seperate parameters
+func serverResource(w http.ResponseWriter, r *http.Request, fileName string, contentType string) error { //use struct instead of seperate parameters
 	file, err := os.Open(fileName)
 	if err != nil {
 		return err
@@ -77,12 +78,20 @@ func serverResource(w http.ResponseWriter, fileName string, contentType string) 
 
 	reader := bufio.NewReader(file)
 	w.Header().Set("Content-Type", contentType)
-	reader.WriteTo(w)
 
+	if contentType != "image/png" {
+		rw := util.GetResponseWriter(w, r)
+		defer rw.Close()
+
+		reader.WriteTo(rw)
+		return nil
+	}
+
+	reader.WriteTo(w)
 	return nil
 }
 
-func renderTemplate(w http.ResponseWriter, name string, data interface{}) error {
+func renderTemplate(w http.ResponseWriter, r *http.Request, name string, data interface{}) error {
 	tmpl, ok := templates[name]
 	if !ok {
 		return fmt.Errorf("the template %s does not exist", name)
@@ -96,7 +105,11 @@ func renderTemplate(w http.ResponseWriter, name string, data interface{}) error 
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	buff.WriteTo(w)
+
+	rw := util.GetResponseWriter(w, r)
+	defer rw.Close()
+
+	buff.WriteTo(rw)
 	return nil
 }
 
