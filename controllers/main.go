@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/erdalkiran/ps-golang-web/viewmodels"
 	"github.com/oxtoacart/bpool"
 )
 
@@ -23,15 +22,7 @@ func Initialize() {
 }
 
 func Register() {
-
-	http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		path := req.URL.Path[1:]
-
-		err := renderTemplate(w, path, getContext(path))
-		if err != nil {
-			handleError(w, err)
-		}
-	})
+	registerController()
 
 	http.HandleFunc("/img/", func(w http.ResponseWriter, req *http.Request) {
 		err := serverResource(w, "public"+req.URL.Path, "image/png")
@@ -48,20 +39,18 @@ func Register() {
 	})
 }
 
-func getContext(path string) interface{} {
-	var context interface{}
+func registerController() {
+	hc := new(homeController)
+	hc.register()
 
-	switch path {
-	case "home":
-		context = viewmodels.NewHome()
-	case "categories":
-		context = viewmodels.NewCategories()
-	case "products":
-		context = viewmodels.NewProducts()
-	case "product":
-		context = viewmodels.NewProduct()
-	}
-	return context
+	cc := new(categoriesController)
+	cc.register()
+
+	psc := new(productsController)
+	psc.register()
+
+	pc := new(productController)
+	pc.register()
 }
 
 func handleError(w http.ResponseWriter, err error) {
