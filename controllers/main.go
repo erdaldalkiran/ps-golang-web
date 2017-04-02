@@ -10,6 +10,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"encoding/json"
+
 	"github.com/erdalkiran/ps-golang-web/controllers/util"
 	"github.com/gorilla/mux"
 	"github.com/oxtoacart/bpool"
@@ -60,6 +62,9 @@ func registerController() {
 
 	prc := new(profileController)
 	prc.register()
+
+	sc := new(standLocatorController)
+	sc.register()
 }
 
 func handleError(w http.ResponseWriter, err error) {
@@ -113,6 +118,27 @@ func renderTemplate(w http.ResponseWriter, r *http.Request, name string, data in
 	defer rw.Close()
 
 	buff.WriteTo(rw)
+	return nil
+}
+
+func renderJSON(w http.ResponseWriter, r *http.Request, data interface{}) error {
+	buff := bufpool.Get()
+	defer bufpool.Put(buff)
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	buff.Write(jsonData)
+
+	w.Header().Set("Content-Type", "application/json")
+
+	rw := util.GetResponseWriter(w, r)
+	defer rw.Close()
+
+	buff.WriteTo(rw)
+
 	return nil
 }
 
