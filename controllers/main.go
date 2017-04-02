@@ -57,6 +57,9 @@ func registerController() {
 
 	pc := new(productController)
 	pc.register()
+
+	prc := new(profileController)
+	prc.register()
 }
 
 func handleError(w http.ResponseWriter, err error) {
